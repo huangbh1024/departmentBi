@@ -1,5 +1,12 @@
+import { useWindowResize } from './utils/ui';
 export const App = defineComponent({
   setup() {
-    return () => <div class='border border-red border-solid w-200px h-200px'></div>;
+    const { screenRef, calcRate, windowDraw, unWindowDraw } = useWindowResize();
+    onMounted(() => {
+      windowDraw();
+      calcRate();
+    });
+    onUnmounted(unWindowDraw);
+    return () => <div ref={screenRef} class='h-full w-full'></div>;
   },
 });
