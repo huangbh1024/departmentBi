@@ -1,9 +1,14 @@
 import { NProgress } from 'naive-ui';
 import { useSwiper } from 'swiper/vue';
-import type { CSSProperties, PropType } from 'vue';
+import type { PropType } from 'vue';
 import { Project } from '../../../interface';
+import { debounce } from 'lodash-es';
 
 const defaultScrollCount = 3;
+const sleep = (delay: number) =>
+  new Promise(resolve => {
+    setTimeout(resolve, delay);
+  });
 
 export const ProjectContentComp = defineComponent({
   props: {
@@ -22,35 +27,42 @@ export const ProjectContentComp = defineComponent({
     const swiper = useSwiper();
     const requestID = ref(0);
     const top = ref(0);
-    const transformStyle = computed<CSSProperties>(() => ({ transform: `translateY(${top.value}px)` }));
     const scrollCount = ref(defaultScrollCount);
     const swiperScrollDelay = ref(30000);
     const startTime = ref(0);
-    const handleContentAutoScroll = () => {
+    const handleContentAutoScroll = async () => {
+      if (!isScroll.value) return;
       const speed = 0.3;
       // 设置滚动位置
-      top.value -= speed;
+      top.value += speed;
       requestID.value = window.requestAnimationFrame(handleContentAutoScroll);
       if (contentRef.value && contentWrapRef.value) {
-        if (Math.abs(top.value) >= contentRef.value.clientHeight) {
-          top.value = contentWrapRef.value.clientHeight;
+        contentWrapRef.value.scrollTo({ top: top.value });
+        if (top.value >= contentWrapRef.value.scrollHeight - contentWrapRef.value.clientHeight) {
+          window.cancelAnimationFrame(requestID.value);
           scrollCount.value--;
+          await sleep(1000);
+          top.value = 0;
+          contentWrapRef.value.scrollTo({ top: top.value });
+          await sleep(1000);
           if (scrollCount.value === 0) {
-            // 判断是否达到30s
             if (new Date().getTime() - startTime.value <= swiperScrollDelay.value) {
               // 继续到30s
               scrollCount.value = 1;
+              requestID.value = window.requestAnimationFrame(handleContentAutoScroll);
             } else {
               top.value = 0;
               slideChange();
               window.cancelAnimationFrame(requestID.value);
             }
+            return;
           }
+          requestID.value = window.requestAnimationFrame(handleContentAutoScroll);
         }
       }
     };
     const timer = ref<number | null>(null);
-    watchEffect(() => {
+    watchEffect(async () => {
       if (swiper.value) {
         if (swiper.value.activeIndex === props.index) {
           startTime.value = new Date().getTime();
@@ -62,9 +74,8 @@ export const ProjectContentComp = defineComponent({
             const wrapperHeight = contentWrapRef.value.clientHeight;
             if (contentHeight > wrapperHeight) {
               // 延迟1s后执行
-              timer.value = setTimeout(() => {
-                requestID.value = window.requestAnimationFrame(handleContentAutoScroll);
-              }, 1000);
+              await sleep(1000);
+              requestID.value = window.requestAnimationFrame(handleContentAutoScroll);
             } else {
               // 延迟30s后切换
               timer.value = setTimeout(() => {
@@ -82,7 +93,22 @@ export const ProjectContentComp = defineComponent({
       clearTimeout(timer.value);
       timer.value = null;
     });
-
+    const restartAutoScroll = debounce(() => {
+      isScroll.value = true;
+      if (contentWrapRef.value) top.value = contentWrapRef.value.scrollTop;
+      requestID.value = window.requestAnimationFrame(handleContentAutoScroll);
+    }, 1500);
+    const isScroll = ref(true);
+    const onWheel = () => {
+      isScroll.value = false;
+      restartAutoScroll();
+    };
+    const onTouchStart = () => {
+      isScroll.value = false;
+    };
+    const onTouchEnd = () => {
+      restartAutoScroll();
+    };
     return () => (
       <>
         <h2 class='text-white text-0.47rem m-0'>{props.data.taskName}</h2>
@@ -97,12 +123,17 @@ export const ProjectContentComp = defineComponent({
             height={25}
           />
         </div>
-        <div class='flex-1 overflow-hidden' ref={contentWrapRef}>
+        <div
+          class='flex-1 overflow-scroll'
+          ref={contentWrapRef}
+          onWheel={onWheel}
+          onTouchend={onTouchEnd}
+          onTouchstart={onTouchStart}
+        >
           <p
             ref={contentRef}
             class='text-#a0a0a0 text-.4rem whitespace-pre-wrap m-0'
             v-html={props.data.taskProgress}
-            style={transformStyle.value}
           ></p>
         </div>
       </>

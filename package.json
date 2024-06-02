@@ -13,12 +13,14 @@
   "dependencies": {
     "@unocss/reset": "^0.60.4",
     "dayjs": "^1.11.11",
+    "lodash-es": "^4.17.21",
     "swiper": "^11.1.4",
     "vue": "^3.4.21"
   },
   "devDependencies": {
     "@commitlint/cli": "^18.4.4",
     "@commitlint/config-conventional": "^18.4.4",
+    "@types/lodash-es": "^4.17.12",
     "@typescript-eslint/eslint-plugin": "^6.19.0",
     "@typescript-eslint/parser": "^6.19.0",
     "@vitejs/plugin-vue": "^5.0.4",
