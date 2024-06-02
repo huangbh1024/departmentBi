@@ -1,3 +1,4 @@
+import { HeaderComp } from './components/Header';
 import { useWindowResize } from './utils/ui';
 export const App = defineComponent({
   setup() {
@@ -7,6 +8,10 @@ export const App = defineComponent({
       calcRate();
     });
     onUnmounted(unWindowDraw);
-    return () => <div ref={screenRef} class='h-full w-full'></div>;
+    return () => (
+      <div ref={screenRef} class='h-full w-full'>
+        <HeaderComp />
+      </div>
+    );
   },
 });
