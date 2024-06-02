@@ -8,12 +8,25 @@
   <title>Vite + Vue + TS</title>
 </head>
 <style>
+  body {
+    -ms-overflow-style: none;
+    /* IE 和 Edge */
+    scrollbar-width: none;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+    /* Safari 和 Chrome */
+  }
+
   #app {
     background: linear-gradient(#032648, #09141c);
     height: 100vh;
     overflow: hidden;
     font-family: SourceHanSansCN-Normal;
+
   }
+
 
   * {
     box-sizing: border-box;
