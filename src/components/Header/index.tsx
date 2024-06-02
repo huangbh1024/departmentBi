@@ -5,6 +5,8 @@ import type { CSSProperties } from 'vue';
 import { NImage, NDivider } from 'naive-ui';
 import dayjs from 'dayjs';
 import styles from './index.module.css';
+import { querySysInfo } from '@/apis';
+import type { SysInfo } from '@/types';
 
 /**
  * 获取星期
@@ -35,11 +37,6 @@ const clearTimer = (timer: Ref<number | null>) => {
   timer.value = null;
 };
 
-interface Announce {
-  id: number;
-  sysBulletinBoard: string;
-}
-
 export const HeaderComp = defineComponent({
   setup() {
     const headerBgStyle: CSSProperties = { background: `url(${HeaderBg}) no-repeat`, backgroundSize: '100% 100%' };
@@ -67,19 +64,19 @@ export const HeaderComp = defineComponent({
     };
 
     const announceDataTimer = ref<number | null>(null);
-    const announce = computed(() => announceList[index.value]?.sysBulletinBoard ?? '');
-    const announceList: Announce[] = reactive([]);
+    const announce = computed(() => announceList.value[index.value]?.sysBulletinBoard ?? '');
+    const announceList = ref<SysInfo[]>([]);
+    const queryData = () => {
+      querySysInfo().then(res => {
+        const { data } = res;
+        announceList.value = data;
+      });
+    };
     /**
      * 定时获取通知
      */
     const queryAnnounceDataInterval = () => {
-      setTimer(
-        announceDataTimer,
-        () => {
-          // axios暂未封装
-        },
-        30000,
-      );
+      setTimer(announceDataTimer, queryData, 30000);
     };
 
     const switchTimer = ref<number | null>(null);
@@ -91,13 +88,14 @@ export const HeaderComp = defineComponent({
       setTimer(
         switchTimer,
         () => {
-          index.value === announceList.length - 1 ? (index.value = 0) : index.value++;
+          index.value === announceList.value.length - 1 ? (index.value = 0) : index.value++;
         },
         27000,
       );
     };
 
     onMounted(() => {
+      queryData();
       setDateInterval();
       queryAnnounceDataInterval();
       switchAnnounceDataInteval();

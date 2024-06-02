@@ -5,7 +5,7 @@ import 'swiper/css';
 import 'swiper/css/effect-flip';
 import { ProjectContentComp } from './components/Content';
 import type { PropType } from 'vue';
-import { Project } from '../interface';
+import { Project } from '@/types';
 
 export const ProjectComp = defineComponent({
   props: {

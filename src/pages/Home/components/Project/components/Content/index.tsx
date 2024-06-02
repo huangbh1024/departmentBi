@@ -1,7 +1,7 @@
 import { NProgress } from 'naive-ui';
 import { useSwiper } from 'swiper/vue';
 import type { PropType } from 'vue';
-import { Project } from '../../../interface';
+import { Project } from '@/types';
 import { debounce } from 'lodash-es';
 
 const defaultScrollCount = 3;
