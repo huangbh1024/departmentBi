@@ -3,10 +3,8 @@ import { Project } from '../interface';
 
 export const MajorProjectComp = defineComponent({
   setup() {
-    const projectList = reactive<{ first: Project[]; second: Project[] }>({ first: [], second: [] });
-    const init = () => {
-      // axios获取数据
-      const res = {
+    const getData = () =>
+      Promise.resolve({
         code: 200,
         message: '操作成功！',
         data: {
@@ -374,13 +372,17 @@ export const MajorProjectComp = defineComponent({
             },
           ],
         },
-      };
-      // 数据处理，将数据分为两份，用于上下显示
-      const { data } = res;
-      const length = data.projectInfoList.length;
-      const middleIndex = Math.ceil(length / 2);
-      projectList.first = data.projectInfoList.slice(0, middleIndex);
-      projectList.second = data.projectInfoList.slice(middleIndex);
+      });
+    const projectList = reactive<{ first: Project[]; second: Project[] }>({ first: [], second: [] });
+    const init = () => {
+      // axios获取数据
+      getData().then(res => {
+        const { data } = res;
+        const length = data.projectInfoList.length;
+        const middleIndex = Math.ceil(length / 2);
+        projectList.first = data.projectInfoList.slice(0, middleIndex);
+        projectList.second = data.projectInfoList.slice(middleIndex);
+      });
     };
 
     onMounted(init);
