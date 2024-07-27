@@ -27,6 +27,9 @@ export const HomePage = defineComponent({
       renderTimer.value = null;
     });
 
+    const test = '1';
+    window.console.log(test);
+
     return () => (
       <div class='flex flex-wrap justify-between items-start content-start h-full p-14px'>
         <div class='flex flex-col justify-between items-center h-89vh w-[calc(100%/3-10px)]'>
